@@ -1,7 +1,6 @@
 #import <Window.h>
 
-static const SDL_WindowFlags kWindowFlags =
-    SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_METAL;
+static const SDL_WindowFlags kWindowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_METAL;
 
 @implementation Window
 {

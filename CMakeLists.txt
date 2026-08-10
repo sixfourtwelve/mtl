@@ -10,10 +10,77 @@ find_package(Stb REQUIRED)
 find_package(ObjFW 1.5 REQUIRED)
 find_package(SDL3 REQUIRED)
 find_path(MINIAUDIO_INCLUDE_DIRS "miniaudio.h")
+find_program(SHADERCROSS_EXECUTABLE NAMES shadercross REQUIRED)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.mm")
 
+set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders")
+set(SHADER_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets/shaders")
+
+file(GLOB_RECURSE SHADER_SOURCES
+  CONFIGURE_DEPENDS
+  "${SHADER_SOURCE_DIR}/*.hlsl"
+)
+file(GLOB_RECURSE SHADER_INCLUDES
+  CONFIGURE_DEPENDS
+  "${SHADER_SOURCE_DIR}/*.hlsli"
+)
+
+set(SHADER_OUTPUTS)
+foreach(SHADER_SOURCE IN LISTS SHADER_SOURCES)
+  file(RELATIVE_PATH SHADER_RELATIVE_PATH "${SHADER_SOURCE_DIR}" "${SHADER_SOURCE}")
+
+  if(SHADER_RELATIVE_PATH MATCHES "\\.vert\\.hlsl$")
+    set(SHADER_STAGE vertex)
+  elseif(SHADER_RELATIVE_PATH MATCHES "\\.frag\\.hlsl$")
+    set(SHADER_STAGE fragment)
+  elseif(SHADER_RELATIVE_PATH MATCHES "\\.comp\\.hlsl$")
+    set(SHADER_STAGE compute)
+  else()
+    message(FATAL_ERROR
+      "Shader '${SHADER_RELATIVE_PATH}' must end in .vert.hlsl, .frag.hlsl, or .comp.hlsl"
+    )
+  endif()
+
+  string(REGEX REPLACE "\\.hlsl$" "" SHADER_RELATIVE_STEM "${SHADER_RELATIVE_PATH}")
+  set(SHADER_OUTPUT_BASE "${SHADER_OUTPUT_DIR}/${SHADER_RELATIVE_STEM}")
+  get_filename_component(SHADER_OUTPUT_SUBDIR "${SHADER_OUTPUT_BASE}" DIRECTORY)
+
+  set(SHADER_SPIRV "${SHADER_OUTPUT_BASE}.spv")
+  set(SHADER_MSL "${SHADER_OUTPUT_BASE}.msl")
+  set(SHADER_DXIL "${SHADER_OUTPUT_BASE}.dxil")
+
+  add_custom_command(
+    OUTPUT
+      "${SHADER_SPIRV}"
+      "${SHADER_MSL}"
+      "${SHADER_DXIL}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${SHADER_OUTPUT_SUBDIR}"
+    COMMAND "${SHADERCROSS_EXECUTABLE}" "${SHADER_SOURCE}"
+      --source HLSL --dest SPIRV --stage "${SHADER_STAGE}"
+      --include "${SHADER_SOURCE_DIR}" --output "${SHADER_SPIRV}"
+    COMMAND "${SHADERCROSS_EXECUTABLE}" "${SHADER_SOURCE}"
+      --source HLSL --dest MSL --stage "${SHADER_STAGE}"
+      --include "${SHADER_SOURCE_DIR}" --output "${SHADER_MSL}"
+    COMMAND "${SHADERCROSS_EXECUTABLE}" "${SHADER_SOURCE}"
+      --source HLSL --dest DXIL --stage "${SHADER_STAGE}"
+      --include "${SHADER_SOURCE_DIR}" --output "${SHADER_DXIL}"
+    DEPENDS "${SHADER_SOURCE}" ${SHADER_INCLUDES}
+    COMMENT "Compiling shader ${SHADER_RELATIVE_PATH}"
+    VERBATIM
+  )
+
+  list(APPEND SHADER_OUTPUTS
+    "${SHADER_SPIRV}"
+    "${SHADER_MSL}"
+    "${SHADER_DXIL}"
+  )
+endforeach()
+
+add_custom_target(shaders ALL DEPENDS ${SHADER_OUTPUTS})
+
 add_executable(${PROJECT_NAME} ${SOURCES})
+add_dependencies(${PROJECT_NAME} shaders)
 
 target_link_libraries(${PROJECT_NAME} ObjFW::ObjFW ObjFW::ARC SDL3::SDL3 glm::glm imgui::imgui)
 target_include_directories(${PROJECT_NAME} PRIVATE 

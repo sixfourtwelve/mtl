@@ -16,9 +16,9 @@
 }
 
 + (instancetype)gpuWithDevice:(Device*)device
-                          pipeline:(Pipeline*)pipeline
-                            window:(Window*)window
-                        imguiLayer:(ImGUILayer*)imguiLayer
+                     pipeline:(Pipeline*)pipeline
+                       window:(Window*)window
+                   imguiLayer:(ImGUILayer*)imguiLayer
 {
     return [[self alloc] initWithDevice:device
                                pipeline:pipeline
@@ -59,11 +59,8 @@
         return false;
     }
 
-    // A null texture is expected while the window is minimized. The command
-    // buffer must still be submitted after acquiring the swapchain.
     if (swapchainTexture != NULL)
     {
-        // SDL_GPU requires ImGui uploads before a render pass begins.
         [_imguiLayer prepareDrawDataWithCommandBuffer:commandBuffer];
 
         SDL_GPUColorTargetInfo colorTargetInfo = { };

@@ -125,7 +125,6 @@
 
     _isShutdown = true;
 
-    // Release dependants before the resources they use.
     _gpu = nil;
     _imguiLayer = nil;
     _pipeline = nil;
