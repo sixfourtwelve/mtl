@@ -39,8 +39,7 @@
 
     ImGui_ImplSDLGPU3_InitInfo initInfo = { };
     initInfo.Device = [_device getDevice];
-    initInfo.ColorTargetFormat =
-        SDL_GetGPUSwapchainTextureFormat([_device getDevice], [_window getSDLWindow]);
+    initInfo.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat([_device getDevice], [_window getSDLWindow]);
 
     _rendererBackendInitialized = ImGui_ImplSDLGPU3_Init(&initInfo);
     if (!_rendererBackendInitialized)

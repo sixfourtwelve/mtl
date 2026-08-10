@@ -18,8 +18,7 @@
     _window = window;
 
     _device = SDL_CreateGPUDevice(
-        SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL |
-            SDL_GPU_SHADERFORMAT_MSL,
+        SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
         true,
         NULL);
     if (_device == NULL)
