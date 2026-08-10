@@ -1,8 +1,8 @@
 #import <ObjFW/ObjFW.h>
 #import <SDL3/SDL_gpu.h>
 
-#import "Device.h"
-#import "Shader.h"
+#import <GPU/Device.h>
+#import <GPU/Shader.h>
 
 @interface Pipeline : OFObject
 {

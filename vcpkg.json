@@ -1,0 +1,17 @@
+{
+  "name": "mtl",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "miniaudio",
+    "glm",
+    "globjects",
+    {
+      "name": "imgui",
+      "features": [
+        "sdlgpu3-binding",
+        "sdl3-binding"
+      ]
+    },
+    "stb"
+  ]
+}

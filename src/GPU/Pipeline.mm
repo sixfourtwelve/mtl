@@ -1,7 +1,7 @@
 #import <ObjFW/ObjFW.h>
 #import <SDL3/SDL_gpu.h>
 
-#import "Pipeline.h"
+#import <GPU/Pipeline.h>
 
 @implementation Pipeline
 + (instancetype)pipelineWithDevice:(Device*)device window:(SDL_Window*)window vertex:(Shader*)vertex fragment:(Shader*)fragment
@@ -27,18 +27,18 @@
 - (SDL_GPUGraphicsPipeline*)createPipeline
 {
     SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {
+        .vertex_shader = [_vertex getShader],
+        .fragment_shader = [_fragment getShader],
+        .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
+        .rasterizer_state = { .fill_mode = SDL_GPU_FILLMODE_FILL },
         .target_info = (SDL_GPUGraphicsPipelineTargetInfo) {
-            .num_color_targets = 1,
             .color_target_descriptions = (SDL_GPUColorTargetDescription[]) {
                 {
                     .format = SDL_GetGPUSwapchainTextureFormat([_device getDevice], _window),
                 },
             },
+            .num_color_targets = 1,
         },
-        .rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL,
-        .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
-        .vertex_shader = [_vertex getShader],
-        .fragment_shader = [_fragment getShader],
     };
 
     _pipeline = SDL_CreateGPUGraphicsPipeline([_device getDevice], &pipelineCreateInfo);

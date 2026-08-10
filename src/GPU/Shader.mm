@@ -1,31 +1,16 @@
 #import <ObjFW/ObjFW.h>
 #import <SDL3/SDL_gpu.h>
 
-#import "Shader.h"
+#import <GPU/Shader.h>
 
 @implementation Shader
 
-+ (instancetype)shaderWithDevice:(Device*)device
-                          source:(OFString*)source
-                   samplerCounts:(Uint32)samplerCounts
-             uniformBufferCounts:(Uint32)uniformBufferCounts
-             storageBufferCounts:(Uint32)storageBufferCounts
-            storageTextureCounts:(Uint32)storageTextureCounts
++ (instancetype)shaderWithDevice:(Device*)device desc:(struct ShaderDescriptor)desc;
 {
-    return [[self alloc] initWithDevice:device
-                                 source:source
-                          samplerCounts:samplerCounts
-                    uniformBufferCounts:uniformBufferCounts
-                    storageBufferCounts:storageBufferCounts
-                   storageTextureCounts:storageTextureCounts];
+    return [[self alloc] initWithDevice:device desc:desc];
 }
 
-- (instancetype)initWithDevice:(Device*)device
-                        source:(OFString*)source
-                 samplerCounts:(Uint32)samplerCounts
-           uniformBufferCounts:(Uint32)uniformBufferCounts
-           storageBufferCounts:(Uint32)storageBufferCounts
-          storageTextureCounts:(Uint32)storageTextureCounts
+- (instancetype)initWithDevice:(Device*)device desc:(struct ShaderDescriptor)desc;
 {
     self = [super init];
     if (self)
@@ -33,7 +18,7 @@
         _device = device;
 
         const char* basePath = SDL_GetBasePath();
-        const char* shaderFilename = [source UTF8String];
+        const char* shaderFilename = [desc.source UTF8String];
         SDL_GPUShaderStage stage;
         if (SDL_strstr(shaderFilename, ".vert"))
         {
@@ -87,15 +72,15 @@
         }
 
         SDL_GPUShaderCreateInfo shaderInfo = {
-            .code = (const Uint8*)code,
             .code_size = codeSize,
+            .code = (const Uint8*)code,
             .entrypoint = entrypoint,
             .format = format,
             .stage = stage,
-            .num_samplers = samplerCounts,
-            .num_uniform_buffers = uniformBufferCounts,
-            .num_storage_buffers = storageBufferCounts,
-            .num_storage_textures = storageTextureCounts
+            .num_samplers = desc.samplerCounts,
+            .num_storage_textures = desc.storageTextureCounts,
+            .num_storage_buffers = desc.storageBufferCounts,
+            .num_uniform_buffers = desc.uniformBufferCounts
         };
 
         _shader = SDL_CreateGPUShader([device getDevice], &shaderInfo);
