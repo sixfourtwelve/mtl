@@ -37,24 +37,29 @@
         char fullPath[256];
         SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats([_device getDevice]);
         SDL_GPUShaderFormat format = SDL_GPU_SHADERFORMAT_INVALID;
+        const char* formatDirectory;
+        const char* fileExtension;
         const char* entrypoint;
 
         if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
         {
-            SDL_snprintf(fullPath, sizeof(fullPath), "%sassets/shaders/%s.spv", basePath, shaderFilename);
             format = SDL_GPU_SHADERFORMAT_SPIRV;
+            formatDirectory = "spirv";
+            fileExtension = "spv";
             entrypoint = "main";
         }
         else if (backendFormats & SDL_GPU_SHADERFORMAT_MSL)
         {
-            SDL_snprintf(fullPath, sizeof(fullPath), "%sassets/shaders/%s.msl", basePath, shaderFilename);
             format = SDL_GPU_SHADERFORMAT_MSL;
+            formatDirectory = "msl";
+            fileExtension = "msl";
             entrypoint = "main0";
         }
         else if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL)
         {
-            SDL_snprintf(fullPath, sizeof(fullPath), "%sassets/shaders/%s.dxil", basePath, shaderFilename);
             format = SDL_GPU_SHADERFORMAT_DXIL;
+            formatDirectory = "dxil";
+            fileExtension = "dxil";
             entrypoint = "main";
         }
         else
@@ -62,6 +67,14 @@
             SDL_Log("%s", "Unrecognized backend shader format!");
             return NULL;
         }
+
+        SDL_snprintf(fullPath,
+            sizeof(fullPath),
+            "%sassets/shaders/%s/%s.%s",
+            basePath,
+            formatDirectory,
+            shaderFilename,
+            fileExtension);
 
         size_t codeSize;
         void* code = SDL_LoadFile(fullPath, &codeSize);
