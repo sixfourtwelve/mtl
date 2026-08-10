@@ -66,6 +66,7 @@
                                       window:[_window getSDLWindow]
                                       vertex:vertexShader
                                     fragment:fragmentShader];
+
     _gpu = [GPU gpuWithDevice:_device
                      pipeline:_pipeline
                        window:_window
