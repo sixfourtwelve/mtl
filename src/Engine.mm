@@ -3,8 +3,10 @@
 
 #import <Engine.h>
 #import <GPU/Device.h>
-#import <GPU/Pipeline.h>
 #import <GPU/GPU.h>
+#import <GPU/Mesh.h>
+#import <GPU/Pipeline.h>
+#import <GPU/Primitives/CubeGeometry.h>
 #import <GPU/Shader.h>
 #import <Input/KeyController.h>
 #import <UI/ImGUILayer.h>
@@ -13,10 +15,11 @@
 @implementation Engine
 {
     Device* _device;
+    Pipeline* _geometryPipeline;
+    GPU* _gpu;
     ImGUILayer* _imguiLayer;
     KeyController* _keyController;
-    Pipeline* _pipeline;
-    GPU* _gpu;
+    Mesh* _spinningCube;
     Window* _window;
     bool _isShutdown;
 }
@@ -41,9 +44,9 @@
 - (void)setupGPU
 {
     ShaderDescriptor vertexShaderDescriptor = {
-        .source = @"triangle.vert",
+        .source = @"cube.vert",
         .samplerCounts = 0,
-        .uniformBufferCounts = 0,
+        .uniformBufferCounts = 1,
         .storageBufferCounts = 0,
         .storageTextureCounts = 0
     };
@@ -52,7 +55,7 @@
                             desc:vertexShaderDescriptor];
 
     ShaderDescriptor fragmentShaderDescriptor = {
-        .source = @"triangle.frag",
+        .source = @"cube.frag",
         .samplerCounts = 0,
         .uniformBufferCounts = 0,
         .storageBufferCounts = 0,
@@ -62,13 +65,17 @@
         [Shader shaderWithDevice:_device
                             desc:fragmentShaderDescriptor];
 
-    _pipeline = [Pipeline pipelineWithDevice:_device
-                                      window:[_window getSDLWindow]
-                                      vertex:vertexShader
-                                    fragment:fragmentShader];
+    _geometryPipeline = [Pipeline pipelineWithDevice:_device
+                                              window:[_window getSDLWindow]
+                                              vertex:vertexShader
+                                            fragment:fragmentShader];
+    _spinningCube = [Mesh meshWithDevice:_device
+                                vertices:kCubeVertices
+                             vertexCount:kCubeVertexCount];
 
     _gpu = [GPU gpuWithDevice:_device
-                     pipeline:_pipeline
+                     pipeline:_geometryPipeline
+                     geometry:_spinningCube
                        window:_window
                    imguiLayer:_imguiLayer];
 }
@@ -128,7 +135,8 @@
 
     _gpu = nil;
     _imguiLayer = nil;
-    _pipeline = nil;
+    _spinningCube = nil;
+    _geometryPipeline = nil;
     _device = nil;
     _window = nil;
 
